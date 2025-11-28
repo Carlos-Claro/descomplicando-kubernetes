@@ -1,0 +1,60 @@
+ 2002  curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+ 2004  chmod +x ./kubectl
+ 2005  sudo mv ./kubectl /usr/local/bin/kubectl
+ 2006  kubectl version --client
+ 2034  kubectl cluster-info --context kind-kind
+ 2035  kubectl get nodes
+ 2037  kubectl get nodes
+ 2038  kubectl cluster-info --context kind-kind
+ 2039  kubectl get nodes
+ 2047  kubectl get nodes
+ 2049  kubectl cluster-info --context kind-kind
+ 2050  kubectl cluster-info 
+ 2051  kubectl get pods
+ 2052  kubectl get namespace
+ 2053  kubectl get pods -n kube-system
+ 2054  kubectl get pods -n kube-system -o wide
+ 2055  kubectl get pods -A
+ 2056  kubectl get deployments -A
+ 2057  kubectl get services -A
+ 2058  kubectl get replicaset -A
+ 2059  kubectl get replicaset -AO
+ 2060  kubectl get replicaset -A -O wide
+ 2061  kubectl get replicaset -A 
+ 2063  kubectl completion --help
+ 2064  kubectl completion bash 
+ 2065  kubectl completion bash > ~/.kube/completion.bash.inc
+  # kubectl shell completion
+ 2069  kubectl run nginx --image nginx --port=80 --name=multinodes 
+ 2070  kubectl run nginx --image nginx --port 80 --name multinodes 
+ 2071  kubectl run --image nginx --port 80 --name multinodes 
+ 2072  kubectl run --image nginx --port 80 
+ 2073  kubectl run nginx --image nginx --port 80
+ 2074  kubectl get pods 
+ 2075  kubectl get pods -A
+ 2076  kubectl exec -ti nginx -- bash
+ 2079  history | grep kubectl
+ 2080  history | grep kubectl >> ../commands.txt
+ 2083  kubectl get pods
+ 2084  kubectl run nginx --image nginx --port 80
+ 2085  kubectl get pods
+ 2086  kubectl expose pods nginx 
+ 2087  kubectl get svc
+ 2088  kubectl delete service nginx 
+ 2089  kubectl expose pods nginx --type NodePort
+ 2090  kubectl get svc
+ 2091  kubectl delete pods nginx 
+ 2092  kubectl delete svc nginx 
+ 2093  kubectl get pods -A
+ 2095  kubectl run --image nginx --port 80 nginx --dry-run=client
+ 2097  kubectl run --image nginx --port 80 nginx --dry-run=client -o yaml > pod-template.yaml
+ 2100  kubectl apply -f pod-template.yaml 
+ 2101  kubectl expose pod nginx 
+ 2102  kubectl get pods
+ 2103  kubectl ger svc]
+ 2104  kubectl get svc
+ 2105  kubectl get all
+ 2106  kubectl get pod,service
+ 2107  kubectl delete -f pod-template.yaml 
+ 2108  kubectl delete service nginx 
+ 2110  history | grep -e "kubectl" > commands.txt 
