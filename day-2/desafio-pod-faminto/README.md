@@ -16,12 +16,12 @@ Seu objetivo é implantar essa aplicação no cluster Kubernetes, mas você prec
         memory: "100Mi"
     command: ["stress"]
     args: ["--vm","1","--vm-bytes","250M","--vm-hang","1"]
-´´´
+```
 Resposta:
 - Comando: `kubectl get pods`
 ```
 treinamento-ch2   0/1     CrashLoopBackOff   1 (14s ago)   18s
-´´´
+```
 - Comando: `kubectl describe pods`
 ```
 Last State:     Terminated
@@ -38,7 +38,7 @@ Events:
   Normal   Pulled     53s                kubelet            Successfully pulled image "polinux/stress" in 1.04893687s
   Warning  BackOff    14s (x8 over 91s)  kubelet            Back-off restarting failed container
   Normal   Pulling    0s (x5 over 96s)   kubelet            Pulling image "polinux/stress"
-´´´
+```
 Analise:
 O teste está sendo realizado com 250MB em um servidor com 200MB disponível
 Solução:
@@ -54,11 +54,11 @@ resources:
     command: ["stress"]
     args: ["--vm","1","--vm-bytes","250M","--vm-hang","1"]
 
-´´´
+```
 - Comando `kubectl get pods`
 ```
 treinamento-ch2   1/1     Running   0          47m
-´´´
+```
 - Comando `kubectl describe pods`
 ```
 Status:           Running
@@ -71,7 +71,7 @@ Events:
   Normal  Created    50m   kubelet            Created container stress
   Normal  Started    50m   kubelet            Started container stress
 
-´´´
+```
 
 
 
