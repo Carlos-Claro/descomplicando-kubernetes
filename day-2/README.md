@@ -24,5 +24,17 @@ $ kubectl logs <name> -c <containerName> -f
 - -c - container
 - -f - mantem status atualizado
 
+-- inserindo limites
+no yaml adiciona as linhas 
+    resources:
+      limits:
+        cpu: "0.5"
+        memory: "128Mi"
+      requests:
+        cpu: "0.3"
+        memory: "64Mi"
+usa o stress para testar o uso
+install stress
+stress --cpu 8 --io 4 --vm 2 --vm-bytes 128M --timeout 10s
 
 
