@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: apache-deployment
+  name: apache-deployment
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: apache-deployment
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: apache-deployment
+    spec:
+      containers:
+      - image: apache
+        name: apache
+        resources: 
+          limits:
+            cpu: "0.5"
+            memory: "128Mi"
+          requests:
+            cpu: "0.3"
+            memory: "64Mi"
