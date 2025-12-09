@@ -1,5 +1,5 @@
 # Day-4
-Criar um deployment com serviços que utilizo no dia-a-dia\
+Criar um deployment com serviços que utilizo no dia-a-dia
 - service 1: 
     - httpd:2.4.66
     - ports: 80 / 443 
@@ -20,11 +20,11 @@ Criar um deployment com serviços que utilizo no dia-a-dia\
     - port: 8080
     - [Documentação](https://hub.docker.com/_/phpmyadmin)
     
-No momento da pesquisa dos containers, encontrei uma referência ao [Bind9.yaml](https://git.launchpad.net/~ubuntu-docker-images/ubuntu-docker-images/+git/bind9/plain/examples/bind9-deployment.yml?h=9.18-22.04) com arquivo de deployment e service, por isso, fiz dois arquivos um com service e outro sem service, como não tivemos esta aula ainda. \
+No momento da pesquisa dos containers, encontrei uma referência ao [Bind9.yaml](https://git.launchpad.net/~ubuntu-docker-images/ubuntu-docker-images/+git/bind9/plain/examples/bind9-deployment.yml?h=9.18-22.04) com arquivo de deployment e service, por isso, fiz dois arquivos um com service e outro sem service, como não tivemos esta aula ainda.  \
 [Arquivo sem Services, licaoCasa.yaml](./licaoCasa.yaml)\
 [Arquivo com Services, licaoCasaService.yaml](./licaoCasaService.yaml)\
 [Arquivo Mono deployment, licaoCasaMono.yaml](./licaoCasaMono.yaml)\
-Nele e em outros exemplos de arquivo Deployment com vários serviços juntos separados apenas por `---`. resolvi testar para o namespace.
+Nele e em outros exemplos de arquivo Deployment, vi vários serviços juntos separados apenas por `---`. resolvi testar para o namespace e para os deployments.
 ```
 apiVersion: v1
 kind: Namespace
@@ -68,7 +68,7 @@ phpmyadmin-deployment-56dbc995c8-8ztn4   0/1     ImagePullBackOff   0           
 - Problemas:
     - Mongo: `ImagePullBackOff` foi resolvido modificando a versão solicitada, alterada para `7-jammy`. 
     - PhpMyadmin: `ImagePullBackOff` foi resolvido modificando a versão solicitada, alterada para `apache`
-    - Mysql: `CrashLoopBackOff` - ``
+    - Mysql: `CrashLoopBackOff` 
 ```
 $ kubectl logs -n server mysql-deployment-ffc87888-ccl72 
 2025-12-09 17:01:47+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.0.44-1debian12 started.
@@ -100,3 +100,35 @@ mysql-deployment-6975cc94b-qn485         0/1     Running   0          5s
 phpmyadmin-deployment-7d74d559cb-77lzg   0/1     Running   0          5s
 ```
 
+## Aplicando licaoCasaMono.yaml
+```
+$ kubectl apply -f ./licaoCasaMono.yaml
+namespace/server created
+deployment.apps/httpd-deployment created
+```
+Resultado: 
+```
+$ kubectl get pods -n server
+NAME                                READY   STATUS             RESTARTS      AGE
+httpd-deployment-74bc958589-88bjn   3/5     CrashLoopBackOff   2 (22s ago)   42s
+httpd-deployment-74bc958589-jkscn   3/5     CrashLoopBackOff   2 (22s ago)   42s
+httpd-deployment-74bc958589-q6wrt   3/5     CrashLoopBackOff   2 (19s ago)   42s
+```
+Verificando erro:
+```
+$ kubectl logs -n server httpd-deployment-74bc958589-88bjn 
+Defaulted container "httpd" out of: httpd, bind9, mongo, mysql, phpmyadmin
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 10.244.1.42. Set the 'ServerName' directive globally to suppress this message
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 10.244.1.42. Set the 'ServerName' directive globally to suppress this message
+[Tue Dec 09 17:13:51.879950 2025] [mpm_event:notice] [pid 1:tid 1] AH00489: Apache/2.4.66 (Unix) configured -- resuming normal operations
+[Tue Dec 09 17:13:51.880019 2025] [core:notice] [pid 1:tid 1] AH00094: Command line: 'httpd -D FOREGROUND'
+10.244.1.1 - - [09/Dec/2025:17:14:01 +0000] "GET / HTTP/1.1" 200 191
+10.244.1.1 - - [09/Dec/2025:17:14:11 +0000] "GET / HTTP/1.1" 200 191
+10.244.1.1 - - [09/Dec/2025:17:14:11 +0000] "GET / HTTP/1.1" 200 191
+```
+Como tem dois apaches no mesmo servidor, ele não vai conseguir. Preferi tirar o phpmyadmin e funcionou:
+```
+$ kubectl get pods -n server
+NAME                                READY   STATUS    RESTARTS   AGE
+httpd-deployment-7b5fdcffff-vxdlq   0/4     Running   0          3s
+```

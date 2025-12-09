@@ -19,7 +19,7 @@ metadata:
   labels:
     app: httpd-deployment
 spec:
-  replicas: 3 
+  replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
@@ -61,12 +61,9 @@ spec:
           timeoutSeconds: 5
           failureThreshold: 3
         readinessProbe:
-          exec:
-            command:
-            - /bin/sh 
-            - curl
-            - -f
-            - http://localhost:80/
+          httpGet:
+            path: /
+            port: 80
           initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 5
@@ -80,3 +77,101 @@ spec:
           protocol: TCP
         - containerPort: 53
           protocol: UDP
+        resources: 
+          limits:
+            cpu: "0.5"
+            memory: "128Mi"
+          requests:
+            cpu: "0.2"
+            memory: "64Mi"
+        startupProbe:
+          tcpSocket:
+            port: 53
+          initialDelaySeconds: 10 
+          timeoutSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 53
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          tcpSocket:
+            port: 53
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+      - name: mongo
+        image: mongo:7-jammy
+        env:
+        ports:
+        - containerPort: 27017
+          protocol: TCP
+        - containerPort: 27017
+          protocol: UDP
+        resources: 
+          limits:
+            cpu: "0.5"
+            memory: "512Mi"
+          requests:
+            cpu: "0.2"
+            memory: "64Mi"
+        startupProbe:
+          tcpSocket:
+            port: 27017
+          initialDelaySeconds: 10 
+          timeoutSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 27017
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          tcpSocket:
+            port: 27017
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+      - name: mysql
+        image: mysql:8.0.44-debian
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "s3cr3tP@ssw0rd"
+        ports:
+        - containerPort: 3306
+          protocol: TCP
+        resources: 
+          limits:
+            cpu: "1"
+            memory: "1024Mi"
+          requests:
+            cpu: "0.5"
+            memory: "128Mi"
+        startupProbe:
+          tcpSocket:
+            port: 3306
+          initialDelaySeconds: 120 
+          timeoutSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 3306
+          initialDelaySeconds: 130
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          tcpSocket:
+            port: 3306
+          initialDelaySeconds: 150
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+      
