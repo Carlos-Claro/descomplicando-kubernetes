@@ -131,4 +131,8 @@ Como tem dois apaches no mesmo servidor, ele não vai conseguir. Preferi tirar o
 $ kubectl get pods -n server
 NAME                                READY   STATUS    RESTARTS   AGE
 httpd-deployment-7b5fdcffff-vxdlq   0/4     Running   0          3s
+
+$ kubectl get pods -n server
+NAME                                READY   STATUS    RESTARTS   AGE
+httpd-deployment-7b5fdcffff-vxdlq   4/4     Running   0          7m40s
 ```
