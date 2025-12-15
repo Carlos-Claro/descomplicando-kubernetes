@@ -136,3 +136,10 @@ $ kubectl get pods -n server
 NAME                                READY   STATUS    RESTARTS   AGE
 httpd-deployment-7b5fdcffff-vxdlq   4/4     Running   0          7m40s
 ```
+
+### Alguns links importantes
+[Define a Command and Arguments for a Container](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container)
+[Connecting Applications with Services](https://kubernetes.io/docs/tutorials/services/connect-applications-service)
+[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset)
+[Configure Liveness, Readiness and Startup Probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes)
+[Performing a Rolling Update](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro)
