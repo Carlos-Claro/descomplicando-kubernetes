@@ -50,6 +50,15 @@ Primeiro, vamos desativar a utilização de swap no sistema. Isso é necessário
 sudo swapoff -a
 ```
 
+no raspberrypi: [https://www.webwhitenoise.com/p/disable-swap-on-raspberry-pi-os-trixie](https://www.webwhitenoise.com/p/disable-swap-on-raspberry-pi-os-trixie)
+
+```
+sudo service rpi-setup-loop@var-swap stop
+```
+Install watchdog: [https://medium.com/@arslion/enabling-watchdog-on-raspberry-pi-b7e574dcba6b](https://medium.com/@arslion/enabling-watchdog-on-raspberry-pi-b7e574dcba6b)
+
+
+
 ##### Carregando os módulos do kernel
 
 Agora, vamos carregar os módulos do kernel necessários para o funcionamento do Kubernetes:
@@ -83,11 +92,11 @@ sudo sysctl --system
 Hora de instalar os pacotes do Kubernetes! Coisa linda de ai meu Deus! Aqui vamos nós:
 
 ```
-sudo apt-get update && sudo apt-get install -y apt-transport-https curl
+sudo apt update && sudo apt install apt-transport-https ca-certificates gnupg curl -y
 
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.34/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
-echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.34/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
@@ -97,7 +106,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 ##### Instalando o containerd
 
-Em seguida, vamos instalar o containerd, que são essenciais para nosso ambiente Kubernetes:
+Em seguida, vamos instalar o containerd, que são essenciais para nosso ambiente Kubernetes PC Normal:
 
 ```
 sudo apt-get update && sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
@@ -107,6 +116,15 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o 
 echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 sudo apt-get update && sudo apt-get install -y containerd.io
+```
+para raspberry PI
+```
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io
 ```
 
 ##### Configurando o containerd
@@ -229,6 +247,55 @@ kubeadm join 172.31.57.89:6443 --token if9hn9.xhxo6s89byj9rsmd \
 	--discovery-token-ca-cert-hash sha256:ad583497a4171d1fc7d21e2ca2ea7b32bdc8450a1a4ca4cfa2022748a99fa477 
 
 ```
+* erro no join do raspbian
+```
+$ sudo kubeadm join 192.168.0.150:6443 --token li3aej.ajg8jjyrwqlp08lw     --discovery-token-ca-cert-hash sha256:e76fcd6694b95018e180f9329391c542d5c3f6ae46c0d48988393a3c921190c2
+[preflight] Running pre-flight checks
+[preflight] The system verification failed. Printing the output from the verification:
+KERNEL_VERSION: 6.12.47+rpt-rpi-v8
+CONFIG_NAMESPACES: enabled
+CONFIG_NET_NS: enabled
+CONFIG_PID_NS: enabled
+CONFIG_IPC_NS: enabled
+CONFIG_UTS_NS: enabled
+CONFIG_CGROUPS: enabled
+CONFIG_CPUSETS: enabled
+CONFIG_MEMCG: enabled
+CONFIG_INET: enabled
+CONFIG_EXT4_FS: enabled
+CONFIG_PROC_FS: enabled
+CONFIG_NETFILTER_XT_TARGET_REDIRECT: enabled (as module)
+CONFIG_NETFILTER_XT_MATCH_COMMENT: enabled (as module)
+CONFIG_FAIR_GROUP_SCHED: enabled
+CONFIG_OVERLAY_FS: enabled (as module)
+CONFIG_AUFS_FS: not set - Required for aufs.
+CONFIG_BLK_DEV_DM: enabled (as module)
+CONFIG_CFS_BANDWIDTH: enabled
+CONFIG_SECCOMP: enabled
+CONFIG_SECCOMP_FILTER: enabled
+OS: Linux
+CGROUPS_CPU: enabled
+CGROUPS_CPUSET: enabled
+CGROUPS_DEVICES: enabled
+CGROUPS_FREEZER: enabled
+CGROUPS_MEMORY: missing
+CGROUPS_PIDS: enabled
+CGROUPS_HUGETLB: missing
+CGROUPS_IO: enabled
+	[WARNING SystemVerification]: missing optional cgroups: hugetlb
+[preflight] Some fatal errors occurred:
+	[ERROR SystemVerification]: missing required cgroups: memory
+[preflight] If you know what you are doing, you can make a check non-fatal with `--ignore-preflight-errors=...`
+error: error execution phase preflight: preflight checks failed
+To see the stack trace of this error execute with --v=5 or higher
+
+```
+Buscando erro do cgroups em foruns , encontrei o issue no git. \
+Adicionando no arquivo /boot/firmware/cmdline.txt: `cgroup_memory=1 cgroup_enable=memory` \
+Quando fui rodar o comando novamente, tinha vencido o token, então rodei o comando `kubeadm token create --print-join-command`\
+retornou o comando: `kubeadm join 192.168.0.150:6443 --token a30rqe.1k622wry075uuky6 --discovery-token-ca-cert-hash sha256:e76fcd6694b95018e180f9329391c542d5c3f6ae46c0d48988393a3c921190c2`\
+Tive que aplicar com sudo para conseguir acessar o arquivo bootstrap-kubeler.conf. \
+
 
 &nbsp;
 
