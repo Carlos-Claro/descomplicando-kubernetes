@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpd-deployment
+  namespace: lab-server 
+  labels:
+    app: httpd-deployment
+spec:
+  replicas: 5 
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: httpd-deployment
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 2 
+  template:
+    metadata:
+      labels:
+        app: httpd-deployment
+    spec:
+      containers:
+      - name: httpd
+        image: httpd:2.4.66
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        resources: 
+          limits:
+            cpu: "1"
+            memory: "512Mi"
+          requests:
+            cpu: "0.3"
+            memory: "128Mi"
+        startupProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 10 
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
