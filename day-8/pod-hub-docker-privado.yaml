@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-hub-docker-privado  
+spec:
+  containers:
+  - name: app
+    image: carlosdockerhubprivado/minha-aplicacao:latest
+  imagePullSecrets:
+  - name: dockerhub-secret
