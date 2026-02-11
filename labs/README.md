@@ -261,5 +261,13 @@ Aplica com `kubectl create -f ../prometheus/kube-prometheus/manifests/setup/` pa
 
 verifica com `kubectl get all -n monitoring` 
 
+aplica `kubectl apply -f day-11/network-policy.yaml` e `kubectl apply -f day-11/grafana-ingress.yaml`
+
+acesso: grafana.carlosclaro.com.br
+
+expoem prometheus: `kubectl port-forward -n monitoring svc/prometheus-k8s 39090:9090`
+
+expoem alertmanager: `kubectl port-forward -n monitoring svc/alertmanager-main 39093:9093`
+
 
 
