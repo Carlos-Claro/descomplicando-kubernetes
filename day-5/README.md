@@ -1,5 +1,5 @@
 # Day 5 - Cluster kubernetes
-Baseado no documento [https://github.com/badtuxx/CertifiedContainersExpert/tree/main/DescomplicandoKubernetes/day-5](badtuxx), com adaprtações para aplicação com arm rasopberry pi.\
+Baseado no documento [https://github.com/badtuxx/CertifiedContainersExpert/tree/main/DescomplicandoKubernetes/day-5](badtuxx), com adaptações para aplicação com arm raspberry pi.\
 
 - O que é um cluster kubernetes:\
 Conjunto de máquinas, nodes, VMs que compõem um cluster.\

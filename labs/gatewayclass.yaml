@@ -1,0 +1,5 @@
+kind: GatewayClass
+metadata:
+  name: testes
+spec:
+  controllerName: "testes.carlosclaro.com.br"

@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: nginxservicemonitor
+  labels:
+    app: nginxservicemonitor
+    app.kubernetes.io/name: nginxservicemonitor
+    app.kubernetes.io/component: nginx
+    app.kubernetes.io/part-of: kube-nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginxservicemonitor
+  endpoints:
+  - port: metrics
+    interval: 30s
+  - port: http
+    interval: 30s

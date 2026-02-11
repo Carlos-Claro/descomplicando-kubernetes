@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ubuntu
+spec: {}
+status: {}
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ubuntu-storage
+provisioner: kubernetes.io/no-provisioner
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  archiveOnDelete: "false"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ubuntu-nfs-pv
+  labels:
+    storage: nfs
+spec:
+  capacity:
+    storage: 2Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 192.168.0.106
+    path: /mnt/nfs
+  storageClassName: ubuntu-storage
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ubuntu-pvc
+  namespace: ubuntu
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: ubuntu-storage
+  selector:
+    matchLabels:
+      storage: nfs
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu-pod
+  namespace: ubuntu
+spec:
+  containers:
+    - name: ubuntu-container
+      image: ubuntu:latest
+      command: ["/bin/bash", "-c", "sleep infinity"]
+      volumeMounts:
+        - name: ubuntu-volume
+          mountPath: /home/
+  volumes:
+    - name: ubuntu-volume
+      persistentVolumeClaim:
+        claimName: ubuntu-pvc
+  restartPolicy: OnFailure
+  

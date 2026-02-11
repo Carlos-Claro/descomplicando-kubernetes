@@ -1,0 +1,15 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: web
+  namespace: default
+spec:
+  gatewayClassName: nginx
+  listeners:
+  - protocol: HTTP
+    port: 80
+    name: web-gw
+    hostname: "*.carlosclaro.com.br"
+    allowedRoutes:
+      namespaces:
+        from: All
