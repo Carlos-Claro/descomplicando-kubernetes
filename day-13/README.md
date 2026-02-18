@@ -94,6 +94,19 @@ f94804cadfce   2 minutes ago   CMD ["flask" "run" "--host=0.0.0.0"]            0
 
 utilizando o python alpine: 
 ```
+Dockerfile
+FROM python:3.11.4-alpine3.18
+
+WORKDIR /app
+COPY . .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+EXPOSE 5000
+
+CMD ["flask", "run", "--host=0.0.0.0"]
+
+
 > docker image ls                                                                                                                kubernetes-admin@kubernetes
 REPOSITORY               TAG             IMAGE ID       CREATED          SIZE
 giropops-senhas          3.0             3f0aef7aaf1d   8 seconds ago    88.2MB
@@ -144,4 +157,148 @@ ENV PATH="/app/venv/bin:$PATH"
 
 
 ENTRYPOINT ["flask", "run", "--host=0.0.0.0"]
+
+> docker image ls                                                                                                                kubernetes-admin@kubernetes
+REPOSITORY               TAG             IMAGE ID       CREATED          SIZE
+giropops-senhas          4.1             15f177ce3847   59 seconds ago   83MB
+
+> docker history giropops-senhas:4.1                                                                                             kubernetes-admin@kubernetes
+IMAGE          CREATED              CREATED BY                                      SIZE      COMMENT
+15f177ce3847   About a minute ago   ENTRYPOINT ["flask" "run" "--host=0.0.0.0"]     0B        buildkit.dockerfile.v0
+<missing>      About a minute ago   ENV PATH=/app/venv/bin:/usr/local/sbin:/usr/…   0B        buildkit.dockerfile.v0
+<missing>      About a minute ago   COPY /app/venv /app/venv # buildkit             19.1MB    buildkit.dockerfile.v0
+<missing>      About a minute ago   COPY static ./static # buildkit                 101kB     buildkit.dockerfile.v0
+<missing>      About a minute ago   COPY templates ./templates # buildkit           5.78kB    buildkit.dockerfile.v0
+<missing>      About a minute ago   COPY app.py . # buildkit                        2.52kB    buildkit.dockerfile.v0
+<missing>      14 minutes ago       WORKDIR /app                                    0B        buildkit.dockerfile.v0
+<missing>      24 hours ago         apko                                            123kB     python by Chainguard
+<missing>      24 hours ago         apko                                            2.78MB    python by Chainguard
+<missing>      24 hours ago         apko                                            1.07MB    python by Chainguard
+<missing>      24 hours ago         apko                                            1.4MB     python by Chainguard
+<missing>      24 hours ago         apko                                            1.65MB    python by Chainguard
+<missing>      24 hours ago         apko                                            1.64MB    python by Chainguard
+<missing>      24 hours ago         apko                                            1.81MB    python by Chainguard
+<missing>      24 hours ago         apko                                            3.48MB    python by Chainguard
+<missing>      24 hours ago         apko                                            6.93MB    python by Chainguard
+<missing>      24 hours ago         apko                                            7.18MB    python by Chainguard
+<missing>      24 hours ago         apko                                            35.7MB    python by Chainguard
 ```
+temos uma imagem enxuta e com menos etapas de criação.
+
+## Ferramentas para scanear images e verificar vulnerabilidades.
+
+- [{https://trivy.dev}](https://trivy.dev) \ 
+pagina de instalação: [https://trivy.dev/docs/latest/getting-started/installation](https://trivy.dev/docs/latest/getting-started/installation) \
+rodando o trivy:
+```
+> trivy image giropops-senhas:1.0
+vulnerabilidades do python nem chega no fim
+Python (python-pkg)
+
+Total: 7 (UNKNOWN: 0, LOW: 2, MEDIUM: 2, HIGH: 3, CRITICAL: 0)
+
+> trivy image giropops-senhas:4.1                                                                                                kubernetes-admin@kubernetes
+2026-02-18T15:12:22-03:00       INFO    [vuln] Vulnerability scanning is enabled
+2026-02-18T15:12:22-03:00       INFO    [secret] Secret scanning is enabled
+2026-02-18T15:12:22-03:00       INFO    [secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-02-18T15:12:22-03:00       INFO    [secret] Please see https://trivy.dev/docs/v0.69/guide/scanner/secret#recommendation for faster secret detection
+2026-02-18T15:12:24-03:00       INFO    [python] Licenses acquired from one or more METADATA files may be subject to additional terms. Use `--debug` flag to see all affected packages.
+2026-02-18T15:12:24-03:00       INFO    Detected OS     family="wolfi" version="20230201"
+2026-02-18T15:12:24-03:00       INFO    [wolfi] Detecting vulnerabilities...    pkg_num=25
+2026-02-18T15:12:24-03:00       INFO    Number of language-specific files       num=1
+2026-02-18T15:12:24-03:00       INFO    [python-pkg] Detecting vulnerabilities...
+
+Report Summary
+
+┌──────────────────────────────────────────────────────────────────────────────────┬────────────┬─────────────────┬─────────┐
+│                                      Target                                      │    Type    │ Vulnerabilities │ Secrets │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ giropops-senhas:4.1 (wolfi 20230201)                                             │   wolfi    │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/blinker-1.9.0.dist-info/METADATA           │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/click-8.3.1.dist-info/METADATA             │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/flask-3.0.3.dist-info/METADATA             │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/itsdangerous-2.2.0.dist-info/METADATA      │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/jinja2-3.1.6.dist-info/METADATA            │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/markupsafe-3.0.3.dist-info/METADATA        │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/pip-26.0.1.dist-info/METADATA              │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/prometheus_client-0.16.0.dist-info/METADA- │ python-pkg │        0        │    -    │
+│ TA                                                                               │            │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/redis-4.5.4.dist-info/METADATA             │ python-pkg │        0        │    -    │
+├──────────────────────────────────────────────────────────────────────────────────┼────────────┼─────────────────┼─────────┤
+│ app/venv/lib/python3.14/site-packages/werkzeug-3.1.5.dist-info/METADATA          │ python-pkg │        0        │    -    │
+└──────────────────────────────────────────────────────────────────────────────────┴────────────┴─────────────────┴─────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+```
+* Imagem limpa
+
+## Utilizando docker scout
+
+```
+> docker scout cves giropops-senhas:1.0
+
+166 vulnerabilities found in 45 packages
+  CRITICAL     0   
+  HIGH         5   
+  MEDIUM       10  
+  LOW          149 
+  UNSPECIFIED  2 
+
+> docker scout cves giropops-senhas:4.1                                                                                          kubernetes-admin@kubernetes
+    ✓ Image stored for indexing
+    ✓ Indexed 63 packages
+    ✓ No vulnerable package detected
+
+
+## Overview
+
+                   │       Analyzed Image        
+───────────────────┼─────────────────────────────
+ Target            │  giropops-senhas:4.1        
+   digest          │  15f177ce3847               
+   platform        │ linux/amd64                 
+   vulnerabilities │    0C     0H     0M     0L  
+   size            │ 35 MB                       
+   packages        │ 63                          
+
+
+## Packages and Vulnerabilities
+
+  No vulnerable packages detected
+
+```
+
+## Assinando imagens
+
+Para garantir a segurança da sua imagem, alem de verificar as vulnerabilidades, precisamos assinar as imagens, para isso utilizamos cosign.
+
+- Utilizando o cosign [https://github.com/sigstore/cosign](https://github.com/sigstore/cosign)
+
+gerando chaves: 
+```
+> cosign generate-key-pair  
+> docker image build -t carlosclaro/goropops-senhas:1.0 .
+> cosign sign -key cosign.key carlosclaro/goropops-senhas:1.0
+> cosign verify --key cosign.pub carlosclaro/goropops-senhas:1.0
+
+Verification for index.docker.io/carlosclaro/goropops-senhas:1.0 --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The signatures were verified against the specified public key
+
+[{"critical":{"identity":{"docker-reference":"index.docker.io/carlosclaro/goropops-senhas:1.0"},"image":{"docker-manifest-digest":"sha256:cad261588dad86d06c85a9203caed987adcf5b27b38e0320994356849f3d7101"},"type":"https://sigstore.dev/cosign/sign/v1"},"optional":{}},{"critical":{"identity":{"docker-reference":"index.docker.io/carlosclaro/goropops-senhas:1.0"},"image":{"docker-manifest-digest":"sha256:cad261588dad86d06c85a9203caed987adcf5b27b38e0320994356849f3d7101"},"type":"https://sigstore.dev/cosign/sign/v1"},"optional":{}},{"critical":{"identity":{"docker-reference":"index.docker.io/carlosclaro/goropops-senhas:1.0"},"image":{"docker-manifest-digest":"sha256:cad261588dad86d06c85a9203caed987adcf5b27b38e0320994356849f3d7101"},"type":"https://sigstore.dev/cosign/sign/v1"},"optional":{}}]
+```
+
+
+
