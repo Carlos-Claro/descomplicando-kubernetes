@@ -29,8 +29,8 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: prometheus-k8s
-      app.kubernetes.io/component: prometheus-k8s
+      app.kubernetes.io/name: prometheus
+      app.kubernetes.io/component: prometheus
       app.kubernetes.io/part-of: kube-prometheus
   policyTypes:
   - Ingress
@@ -51,8 +51,8 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: alertmanager-main
-      app.kubernetes.io/component: alertmanager-main
+      app.kubernetes.io/name: alertmanager
+      app.kubernetes.io/component: alert-router
       app.kubernetes.io/part-of: kube-prometheus
   policyTypes:
   - Ingress
