@@ -85,7 +85,7 @@ Solução:
 env:
 - name: MYSQL_ROOT_PASSWORD
     value: "s3cr3tP@ssw0rd"
-```
+```   
 Resultado:
 ```
 $ kubectl get pods -n server

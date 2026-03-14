@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: redis
+  name: redis-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - image: cgr.dev/chainguard/redis
+        name: redis
+        ports:
+          - containerPort: 6379
+        resources:
+          limits:
+            memory: "64Mi"
+            cpu: "40m"
+          requests:
+            memory: "32Mi"
+            cpu: "15m"
+        startupProbe:
+          tcpSocket:
+            port: 6379 # Verifique se a porta do Redis está ativa
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: giropops-senhas
+  name: giropops-senhas
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: giropops-senhas
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 2
+  template:
+    metadata:
+      labels:
+        app: giropops-senhas
+    spec:
+      containers:
+      - image: carlosclaro/goropops-senhas:1.0
+        name: giropops-senhas
+        env:
+        - name: REDIS_HOST
+          value: redis-service
+        ports:
+        - name: http-giro
+          containerPort: 5000
+        resources: 
+          limits:
+            cpu: 20m
+            memory: 96Mi
+          requests:
+            cpu: 15m
+            memory: 64Mi
+        # startupProbe:
+        #   httpGet:
+        #     path: /
+        #     port: http-giro
+        #   initialDelaySeconds: 90
+        #   timeoutSeconds: 10
+        #   failureThreshold: 3
+        # livenessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: http-giro
+        #   initialDelaySeconds: 10
+        #   periodSeconds: 10
+        #   timeoutSeconds: 5
+        #   failureThreshold: 3
+        # readinessProbe:
+        #   httpGet: 
+        #     path: /
+        #     # path: /api/senhas
+        #     port: http-giro
+        #   initialDelaySeconds: 10
+        #   periodSeconds: 10
+        #   failureThreshold: 3

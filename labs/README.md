@@ -1,8 +1,5 @@
 # Lab caseiro do Saltinho da Malhada
 
-## Referências:
-- [https://github.com/kelseyhightower/kubernetes-the-hard-way/tree/master](https://github.com/kelseyhightower/kubernetes-the-hard-way/tree/master)
-- [RaspFirstSteps](./RaspFirstStep.md) - configurações iniciais para raspberry architecture arm64
 
 ## Objetivo:
 Criar um Laboratório de estudos de kubernetes com cluster, utilizando hardware disponível que é fruto de acumulo de anos e obsolescência.
@@ -13,7 +10,7 @@ O título, "Lab caseiro do Saltinho da Malhada" foi inspirado na localização g
 
 A intenção do artigo é exibir os primeiros passos e desafios de implementar cluster kubernetes físico, com base nas aulas do curso [Descomplicando Kubernetes da linuxTips](https://linuxtips.io/treinamento/descomplicando-o-kubernetes)
 
-## Instalação e Configuração inicial Kubernetes
+# Instalação e Configuração inicial Kubernetes
 
 Para este projeto vamos utilizar [kubeadm](https://kubernetes.io/pt-br/docs/reference/setup-tools/kubeadm). É uma ferramenta para criar e gerenciar um cluster Kubernetes em vários nós. Ele automatiza muitas das tarefas de configuração do cluster, incluindo a instalação do control plane e dos nodes. É altamente configurável e pode ser usado para criar clusters personalizados.
 
@@ -88,28 +85,7 @@ sudo systemctl status containerd
 Ativar o kubelet `sudo systemctl enable --now kubelet`
 
 ## Composição hardware
-- Raspberry PI 3B+ Black
-```
-$ hostnamectl
-Static hostname: raspberrypi
-       Icon name: computer
-      Machine ID: 01b74a1cf2014dd6b7f9f4479cd52ff3
-         Boot ID: 4f6ed1fe0778496993c951cb809232eb
-Operating System: Debian GNU/Linux 13 (trixie)    
-          Kernel: Linux 6.12.47+rpt-rpi-v8
-    Architecture: arm64
-```
-- Raspberry PI 3B+ Red
-```
-$ hostnamectl
-Static hostname: raspberrypired
-       Icon name: computer
-      Machine ID: 09d491f7391a4b03932d23b3ea0555a7
-         Boot ID: dc3286b7ead845b49edc9c69ace20307
-Operating System: Debian GNU/Linux 13 (trixie)    
-          Kernel: Linux 6.12.47+rpt-rpi-v8
-    Architecture: arm64
-```
+
 - Notebook dell i5 3 geração
 ```
 $ sudo hostnamectl 
@@ -163,27 +139,34 @@ Firmware Version: F2
    Firmware Date: Wed 2020-05-27
     Firmware Age: 5y 7month 4w 
 ```
-
-
-
+- Raspberry PI 3B+ Black *** Inativo
+```
+$ hostnamectl
+Static hostname: raspberrypi
+       Icon name: computer
+      Machine ID: 01b74a1cf2014dd6b7f9f4479cd52ff3
+         Boot ID: 4f6ed1fe0778496993c951cb809232eb
+Operating System: Debian GNU/Linux 13 (trixie)    
+          Kernel: Linux 6.12.47+rpt-rpi-v8
+    Architecture: arm64
+```
+- Raspberry PI 3B+ Red *** Inativo
+```
+$ hostnamectl
+Static hostname: raspberrypired
+       Icon name: computer
+      Machine ID: 09d491f7391a4b03932d23b3ea0555a7
+         Boot ID: dc3286b7ead845b49edc9c69ace20307
+Operating System: Debian GNU/Linux 13 (trixie)    
+          Kernel: Linux 6.12.47+rpt-rpi-v8
+    Architecture: arm64
+```
 
 ## Serviços:
 
-Utilizando pc's disponíveis em casa, vamos montar um sistema de clusters Kubernetes para emular os serviços que utilizo em cloud.\
 Os serviços que precisam ser alocados são:
-- Bind9 - Sistema de DNS para distribuição de serviços de NIC, domínios de teste:
-    - testes.carlosclaro.com.br
-    - portais.carlosclaro.com.br
-    - app.carlosclaro.com.br
-    - api.carlosclaro.com.br
-    - local.carlosclaro.com.br
-    - carlosclaro.ddns.net
-    - pow.ddns.net
-    - mysql.carlosclaro.com.br
-    Limits
-        - CPU - 0.3
-        - Memory - 128Mi
-- Apache / Lets encrypt
+
+- Nginx / Cert-Manager
     - PHP 7.4 - Sistema de administração de imóveis e Sites, framework Codeigniter, comunica com MySQL e Mongodb. DNS - testes.carlosclaro.com.br
     - PHP 7.4 - Sistema de Portais com multiplos domínios, framework Codeigniter, comunica com Mongodb. DNS - portais.carlosclaro.com.br
     - php 8.2 - Sistema novo de administração, framework Laravel, comunica com MySQL e Mongodb. DNS - app.carlosclaro.com.br
@@ -198,6 +181,18 @@ Os serviços que precisam ser alocados são:
     - Limits
         - CPU - 1
         - Memory - 2Gi
+- Bind9 - Sistema de DNS para distribuição de serviços de NIC, domínios de teste:
+    - testes.carlosclaro.com.br
+    - portais.carlosclaro.com.br
+    - app.carlosclaro.com.br
+    - api.carlosclaro.com.br
+    - local.carlosclaro.com.br
+    - carlosclaro.ddns.net
+    - pow.ddns.net
+    - mysql.carlosclaro.com.br
+    Limits
+        - CPU - 0.3
+        - Memory - 128Mi
 
 ## Simulação 
 
@@ -205,8 +200,31 @@ Utilizando o [Strigus.io](Strigus.io), simularemos o que precisamos implementar.
 
 ![architeture](./images/strigus-architecture-2026-01-19.png)
 
+# Preparação de Ambiente K8S
+Nesta etapa vamos descrever os passos para iniciar e preparar o ambiente k8s para receber as aplicações
 
+## Adicionando mais contexts ao mesmo config com Merge ** Dica do Felipe 
+[Dicas-Kubectl.md](https://github.com/felipesoaresti/Rancher/blob/main/Dicas-Kubectl.md)
+```
+#!/bin/bash
 
+# 0) Backup opcional do config atual
+cp -f ~/.kube/config ~/.kube/config1.yaml. 2>/dev/null
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config2.yaml
+sudo chown carlos:carlos ~/.kube/config2.yaml
+
+# 1) Liste os arquivos que quer mesclar
+FILES="$HOME/.kube/config1.yaml:$HOME/.kube/config2.yaml"
+
+# 2) Exporte a variável KUBECONFIG com separador ":"
+export KUBECONFIG=$FILES
+
+# 3) Gere um único arquivo achatado (merge + flatten)
+kubectl config view --merge --flatten > ~/.kube/config
+
+# 4) Limpe a variável
+unset KUBECONFIG
+```
 ## Implementa weave daemonset - day 5
 Colabora com a comunicação entre as instâncias do cluster
 `kubectl apply -f day-5/weave-daemonset-k8s.yaml`\
@@ -246,9 +264,9 @@ Neste passo, já vai conseguir acessar o nginx ingres com erro 404, pois ainda n
 endereço ip da aplicação, neste caso: 192.168.0.106 na rede local
 
 ## Preparação do servidor para receber certificados com cert-manager - day-10
-Instalando com `kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.19.2/cert-manager.yaml`
+Instalando com `kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.19.2/cert-manager.yaml` ou `kubectl apply -f ../day-10/cert-manager.yaml`
 
-verificando `kubectl get pods -n cert-manager`
+verificando `kubectl get all -n cert-manager`
 
 utilizar os arquivos [./staging-issuer.yaml] `kubectl apply -f ../day-10/staging-issuer.yaml` (staging-issuer.yaml) e `kubectl apply -f ../day-10/production-issuer.yaml` [./production-issuer.yaml](production-issuer.yaml)\
 verifica com `kubectl get issuers.cert-manager.io  ` e `kubectl get clusterissuers.cert-manager.io ` ou com `kubectl get secrets -A`
@@ -273,5 +291,64 @@ expoem prometheus: `kubectl port-forward -n monitoring svc/prometheus-k8s 39090:
 
 expoem alertmanager: `kubectl port-forward -n monitoring svc/alertmanager-main 39093:9093`
 
+## Configurando metrics-server - day 14
+
+```
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+ou 
+kubectl apply -f ../day-14/metrics-server-components.yaml
+adicione no spec.template.container.args - --kubelet-insecure-tls
+```
+utiliza `k get pods -n kube-system` para verificar o item `metrics-server-` esta running e ready. \
 
 
+## Configurando Kyverno - day 15
+
+Utilizando o Heml é necessário iniciar o comando `helm install kyverno kyverno/kyverno -n kyverno --create-namespace` para que o kyverno esteja presente e valide as regras.
+
+
+# Aplicação
+- O Namespace `lab-server` [./app/namespace.yaml](./app/namespace.yaml)
+- Aplicação painel administrativo
+    - Image: carlosclaro/admin:1.0
+    - ConfigMap: 
+        - keys
+    - Volumes: 
+        - /sites
+        - /temporario
+- Aplicação Portais
+    - Image: carlosclaro/portais:3.0
+    - ConfigMap:
+- Bancos de dados:
+    - MySQL
+        - Image: mysql:8.0.45-debian
+        - ConfigMap:
+        - Volumes:
+            - /var/lib/mysql
+            - /media/repositorio-ubun/lib/mysql
+    - MongoDB
+        - Image: mongo:4.4.30-focal
+        - ConfigMap:
+        - Volumes:
+            - /var/lib/mongodb
+            - /media/repositorio-ubun/lib/mongodb
+
+
+* Para preparação de ambiente de dados, utilize ln para link dos arquivos de banco de dados: \
+```
+ln -s /run/user/1000/gvfs/sftp:host=192.168.0.150/var/lib/mysql /media/repositorio-ubun/lib/
+ln -s /run/user/1000/gvfs/sftp:host=192.168.0.150/var/lib/mongodb /media/repositorio-ubun/lib/
+```
+
+
+
+        
+
+
+
+
+
+
+## Referências:
+- [https://github.com/kelseyhightower/kubernetes-the-hard-way/tree/master](https://github.com/kelseyhightower/kubernetes-the-hard-way/tree/master)
+- [RaspFirstSteps](./RaspFirstStep.md) - configurações iniciais para raspberry architecture arm64
