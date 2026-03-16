@@ -18,7 +18,7 @@ Redistribuindo `k rollout restart deployment nginx`
 Não adicionar nada novo 
 cria taint `k taint node gpu=true:NoSchedule`
 
-
+/[]
 ### Toleration
 Agora que entendemos como os Taints funcionam e como eles influenciam o agendamento de Pods nos Nodes, vamos mergulhar no mundo das Tolerations. As Tolerations são como o "antídoto" para os Taints. Elas permitem que um Pod seja agendado em um Node que possui um Taint específico. Em outras palavras, elas "toleram" as Taints. \
 veja arquivo [deployment-nginx-gpu.yaml](deployment-nginx-gpu.yaml)
@@ -38,3 +38,4 @@ veja arquivo [deployment-nginx-affinity.yaml](deployment-nginx-affinity.yaml)
 
 ## AntiAffinity
 
+[deployment-nginx-antiaffinity.yaml](deployment-nginx-antiaffinity.yaml)
